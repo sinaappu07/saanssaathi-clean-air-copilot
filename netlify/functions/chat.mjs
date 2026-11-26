@@ -105,6 +105,15 @@ export default async function handler(request) {
     });
     const result = await upstream.json().catch(() => ({}));
     if (!upstream.ok) {
+      const providerError = result?.error && typeof result.error === "object" ? result.error : {};
+      console.error("Gemini API request failed", {
+        httpStatus: upstream.status,
+        providerCode: Number.isFinite(providerError.code) ? providerError.code : undefined,
+        providerStatus: typeof providerError.status === "string" ? providerError.status : undefined,
+        providerMessage: typeof providerError.message === "string"
+          ? providerError.message.slice(0, 400)
+          : "No provider error message returned",
+      });
       const status = upstream.status === 429 ? 429 : 502;
       return json({ error: status === 429
         ? "The AI service is busy or its usage limit was reached. Please try again later."
@@ -123,3 +132,4 @@ export default async function handler(request) {
     clearTimeout(timeout);
   }
 }
+
