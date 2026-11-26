@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaansSaathi (साँस साथी) 🌿 | Urban Air Quality Assistant & Clean-Air Copilot</title>
+  <meta name="description" content="A family clean-air copilot that combines city-level air-quality estimates with household routines and an AI assistant." />
+  
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            heading: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            emerald: {
+              400: '#00F59B',
+              500: '#10b981',
+              600: '#059669',
+            },
+            cyan: {
+              400: '#00E5FF',
+              500: '#06b6d4',
+            },
+            crimson: '#FF2A6D',
+            amberNeon: '#FFB703',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: #050811;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Glassmorphism Primitives */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-panel-subtle {
+      background: rgba(30, 41, 59, 0.55);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Luminous Neon Selection */
+    ::selection {
+      background: #00F59B;
+      color: #050811;
+      text-shadow: 0 0 8px rgba(0, 245, 155, 0.7);
+    }
+
+    /* Interactive Text Touch Highlights */
+    .touch-term {
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      background: rgba(0, 245, 155, 0.15);
+      color: #5eead4;
+      border-bottom: 2px solid rgba(0, 245, 155, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .touch-term:hover, .touch-term:active {
+      background: linear-gradient(90deg, #00F59B, #00E5FF);
+      color: #050811;
+      box-shadow: 0 0 14px rgba(0, 245, 155, 0.6);
+      transform: translateY(-1px);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 245, 155, 0.6);
+    }
+
+    /* Keyframe Animations */
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spinSlow 12s linear infinite;
+    }
+
+    @keyframes pulseSlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.03); }
+    }
+    .animate-pulse-slow {
+      animation: pulseSlow 3s ease-in-out infinite;
+    }
+
+    input[type=range] {
+      accent-color: #00F59B;
+    }
+  
+    /* Light mode readability overrides. Dark mode keeps its existing palette. */
+    html:not(.dark) body { background-color: #f1f5f9; color: #0f172a; }
+    html:not(.dark) .glass-panel { background: rgba(255,255,255,.94); border-color: #cbd5e1; box-shadow: 0 12px 30px rgba(15,23,42,.08); }
+    html:not(.dark) .glass-panel-subtle { background: rgba(248,250,252,.96); border-color: #cbd5e1; }
+    html:not(.dark) header, html:not(.dark) footer, html:not(.dark) body > div.sticky { background-color: rgba(255,255,255,.96) !important; border-color: #cbd5e1 !important; }
+    html:not(.dark) [class~="bg-slate-950"], html:not(.dark) [class~="bg-slate-950/95"], html:not(.dark) [class~="bg-slate-950/85"], html:not(.dark) [class~="bg-slate-950/80"], html:not(.dark) [class~="bg-slate-900"], html:not(.dark) [class~="bg-slate-900/90"], html:not(.dark) [class~="bg-slate-800"] { background-color: #e2e8f0 !important; }
+    html:not(.dark) [class~="border-slate-800"] { border-color: #cbd5e1 !important; }
+    html:not(.dark) [class~="text-white"], html:not(.dark) [class~="text-slate-100"], html:not(.dark) [class~="text-slate-200"], html:not(.dark) [class~="text-slate-300"] { color: #0f172a !important; }
+    html:not(.dark) [class~="text-slate-400"], html:not(.dark) [class~="text-slate-500"] { color: #475569 !important; }
+    html:not(.dark) [class~="text-emerald-200"], html:not(.dark) [class~="text-cyan-200"], html:not(.dark) [class~="text-rose-200"] { color: #334155 !important; }
+    html:not(.dark) [class~="text-emerald-300"], html:not(.dark) [class~="text-emerald-400"] { color: #047857 !important; }
+    html:not(.dark) [class~="text-cyan-300"], html:not(.dark) [class~="text-cyan-400"] { color: #0e7490 !important; }
+    html:not(.dark) [class~="text-teal-300"], html:not(.dark) [class~="text-teal-400"] { color: #0f766e !important; }
+    html:not(.dark) [class~="text-amber-200"], html:not(.dark) [class~="text-amber-300"], html:not(.dark) [class~="text-amber-400"] { color: #92400e !important; }
+    html:not(.dark) [class~="text-rose-300"], html:not(.dark) [class~="text-rose-400"] { color: #be123c !important; }
+    html:not(.dark) [class~="text-orange-400"] { color: #c2410c !important; }
+    html:not(.dark) .bg-gradient-to-r [class~="text-white"], html:not(.dark) .bg-gradient-to-tr [class~="text-white"], html:not(.dark) button[class~="text-white"] { color: #fff !important; }
+    html:not(.dark) input, html:not(.dark) select { color: #0f172a !important; }
+    html:not(.dark) input::placeholder { color: #64748b !important; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+  <!-- Interactive Atmospheric Smog & Clean Air Canvas Particle Simulation -->
+  <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-75"></canvas>
+
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/80 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between gap-3">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-0.5 shadow-lg shadow-emerald-500/25 flex items-center justify-center text-slate-950">
+          <svg class="w-6 h-6 animate-pulse-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-heading font-black text-xl sm:text-2xl tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+              SaansSaathi (साँस साथी)
+            </span>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              CLEAN-AIR AI
+            </span>
+          </div>
+          <p class="hidden md:block text-xs font-semibold text-slate-400 -mt-0.5">
+            Family Clean-Air Copilot
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls & Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Mode Badge Indicator -->
+        <div id="headerModePill" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/30 text-xs font-black">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <span id="headerModeText">Red Alert Smog</span>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="w-10 h-10 p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-800 text-lg transition-colors" title="Switch light/dark mode" aria-label="Switch to light mode">
+          <span id="themeIcon">☀️</span>
+        </button>
+
+        <!-- Audio SFX Toggle -->
+        <button id="audioToggleBtn" onclick="toggleAudio()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-800 transition-colors" title="Toggle High-Tech Audio SFX">
+          <svg id="audioIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+        </button>
+
+        <!-- Bilingual Switcher -->
+        <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 text-xs font-extrabold tracking-wider transition-colors">
+          <span id="langBtnText">हिंदी</span>
+        </button>
+
+        <!-- 1-Click Delhi Smog Demo Button -->
+        <button onclick="triggerSeedDemo()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-purple-500/20 hover:from-amber-500/30 hover:to-purple-500/30 text-amber-300 border border-amber-500/40 text-xs font-extrabold shadow-sm active:scale-95 transition-all">
+          <span class="text-amber-400 animate-spin-slow">⚡</span>
+          <span>Delhi Smog Demo</span>
+        </button>
+
+        <!-- Copilot Chat Trigger -->
+        <button onclick="openChat()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-emerald-500/25 transition-all active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+          <span class="hidden sm:inline">Ask AI</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Quick Jump Sticky Dock -->
+  <div class="sticky top-18 z-30 backdrop-blur-xl bg-slate-950/85 border-b border-slate-800/80 py-2.5 px-4 overflow-x-auto no-scrollbar shadow-lg">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 text-xs">
+      <span class="font-black text-[11px] uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 shrink-0">
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+        Quick Jump:
+      </span>
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+        <a href="#modes" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-rose-400 border border-slate-800 font-bold text-[11px] whitespace-nowrap transition-all">
+          🛡️ 5 Defense Modes
+        </a>
+        <a href="#live-aqi" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-800 font-bold text-[11px] whitespace-nowrap transition-all">
+          📊 City AQI Model & Breakdown
+        </a>
+        <a href="#diagrams" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-cyan-400 border border-slate-800 font-bold text-[11px] whitespace-nowrap transition-all">
+          📐 Visual Blueprints & Lab
+        </a>
+        <a href="#action-plan" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-emerald-400 border border-slate-800 font-bold text-[11px] whitespace-nowrap transition-all">
+          📋 Personalized Plan & Hacks
+        </a>
+        <a href="#community" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-orange-400 border border-slate-800 font-bold text-[11px] whitespace-nowrap transition-all">
+          🏘️ Community Shield & SOS
+        </a>
+        <a href="#simulator" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-teal-400 border border-slate-800 font-bold text-[11px] whitespace-nowrap transition-all">
+          🎛️ What-If Simulator
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-10 sm:space-y-14 relative z-10">
+
+    <!-- Hero Notice Banner -->
+    <div class="relative overflow-hidden rounded-3xl p-6 sm:p-9 bg-gradient-to-r from-emerald-600 via-teal-700 to-cyan-800 text-white shadow-2xl shadow-emerald-950/40 border border-emerald-400/25">
+      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-2.5 max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-black text-white border border-white/20">
+            <span class="text-amber-300">✨</span>
+            <span>Urban Air Quality Assistant • Family Clean-Air Copilot</span>
+          </div>
+          <h1 id="heroHeading" class="text-2xl sm:text-4xl lg:text-5xl font-black font-heading tracking-tight leading-tight drop-shadow-md">
+            Navigate Severe Winter Smog with Your Family's Clean-Air Copilot
+          </h1>
+          <p id="heroSub" class="text-xs sm:text-sm text-emerald-100/95 leading-relaxed max-w-xl">
+            Load air-quality estimates for your city and ask the Family Clean-Air Copilot for practical routines, indoor-air ideas, sustainable swaps, and the impact of each choice.
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full md:w-auto">
+          <button onclick="triggerSeedDemo()" class="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white text-slate-950 hover:bg-emerald-50 text-xs sm:text-sm font-black shadow-xl active:scale-95 transition-all">
+            <span class="text-amber-500">⚡</span>
+            <span>Load Delhi Severe Smog Demo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ambient luminous orbs -->
+      <div class="absolute -right-16 -top-16 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
+      <div class="absolute right-40 -bottom-20 w-96 h-96 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none"></div>
+    </div>
+
+    <!-- SECTION 1: 5 OPERATIONAL DEFENSE MODES -->
+    <section id="modes" class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🛡️</span>
+            <h2 class="text-lg sm:text-xl font-black font-heading text-white">
+              Air Quality Defense Modes
+            </h2>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/15 text-rose-400 border border-rose-500/30">
+              5 Presets
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Select an operating mode to dynamically calibrate safety thresholds, routines & dashboard atmosphere
+          </p>
+        </div>
+        <button onclick="readActiveModeVoice()" class="self-start sm:self-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-300 border border-slate-800">
+          <span class="text-emerald-400">🔊</span>
+          <span>Audio Brief</span>
+        </button>
+      </div>
+
+      <!-- Mode Cards Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="modesContainer">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Active Mode Directives Banner -->
+      <div id="activeModeBanner" class="p-5 rounded-3xl border-2 border-rose-500/50 bg-rose-950/20 glass-panel space-y-3 shadow-xl transition-all">
+        <!-- Dynamic content filled by JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 2: LIVE AQI & BREAKDOWN -->
+    <section id="live-aqi" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <!-- AQI Dial Card -->
+        <div class="lg:col-span-5 glass-panel rounded-3xl p-6 sm:p-7 border-t-4 border-rose-500 flex flex-col justify-between space-y-4 shadow-xl">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-rose-400 font-mono">
+                CITY AQI MODEL ESTIMATE
+              </span>
+              <h3 id="aqiLocation" class="text-lg font-bold font-heading text-white">
+                Load a city in the Copilot
+              </h3>
+            </div>
+            <span id="aqiStatusBadge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-500/20 text-slate-400 border border-slate-500/40">
+              Waiting for city
+            </span>
+          </div>
+
+          <!-- Radial Circle Representation -->
+          <div class="flex flex-col items-center justify-center py-4 relative">
+            <div class="w-48 h-48 rounded-full border-8 border-rose-500/30 flex flex-col items-center justify-center relative shadow-2xl shadow-rose-950/50">
+              <span id="aqiValue" class="text-5xl font-black font-heading text-slate-400 tracking-tight">—</span>
+              <span id="aqiCategory" class="text-xs font-bold uppercase tracking-wider text-slate-400 mt-1">No city loaded</span>
+              <span id="pm25Current" class="text-[10px] text-slate-400 font-mono mt-0.5">PM2.5: —</span>
+            </div>
+            <div class="text-center mt-3">
+              <span id="aqiDataNote" class="text-xs text-slate-300">Choose a city in the Copilot to load an air-quality model estimate.</span>
+            </div>
+          </div>
+
+          <!-- Safe Outdoor Window Card -->
+          <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between text-xs">
+            <div>
+              <span class="text-[10px] font-bold uppercase text-amber-400">Data note</span>
+              <p class="font-extrabold text-amber-200 mt-0.5">Model estimate, not a local ground-monitor reading</p>
+            </div>
+            <span class="text-xl">☀️</span>
+          </div>
+        </div>
+
+        <!-- 6 Key Pollutants Grid -->
+        <div class="lg:col-span-7 glass-panel rounded-3xl p-6 sm:p-7 border border-slate-800 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base sm:text-lg font-bold font-heading text-white flex items-center gap-2">
+              <span>🔬</span>
+              <span>Key Multi-Pollutant Concentrations</span>
+            </h3>
+            <span id="pollutantSourceLabel" class="text-xs text-slate-400">Load a city to view modeled concentrations</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="pollutantGrid">
+            <!-- Filled dynamically -->
+          </div>
+
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+            <span>💡 <strong>Touch any highlighted term</strong> like <span class="touch-term" onclick="openTerm('PM2.5')">PM2.5</span> or <span class="touch-term" onclick="openTerm('NO₂')">NO₂</span> to view biological deposition & voice audio!</span>
+          </div>
+          <p class="text-[10px] text-slate-400">Air-quality estimates: <a class="underline" href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>, based on CAMS forecast data. Model resolution and update timing vary by region.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: INTERACTIVE ENVIRONMENTAL BLUEPRINTS & LAB -->
+    <section id="diagrams" class="glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl border-t-4 border-cyan-500 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-2xl bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+            <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black font-heading text-white">
+                Interactive Engineering Diagrams & Blueprints
+              </h2>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                Visual Lab
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Explore scientific engineering models, atmospheric inversion traps, and respiratory deposition pathways
+            </p>
+          </div>
+        </div>
+
+        <!-- Diagram Tabs -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          <button onclick="switchDiagram('corsi')" id="tab-corsi" class="diagram-tab-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-md">
+            🛠️ Corsi-Rosenthal Box
+          </button>
+          <button onclick="switchDiagram('inversion')" id="tab-inversion" class="diagram-tab-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold glass-panel text-slate-300 hover:bg-slate-800">
+            🌡️ Inversion Lid Trap
+          </button>
+          <button onclick="switchDiagram('lungs')" id="tab-lungs" class="diagram-tab-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold glass-panel text-slate-300 hover:bg-slate-800">
+            🫁 Lung Soot Deposition
+          </button>
+          <button onclick="switchDiagram('corridors')" id="tab-corridors" class="diagram-tab-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold glass-panel text-slate-300 hover:bg-slate-800">
+            🚴 Clean Commute Corridors
+          </button>
+        </div>
+      </div>
+
+      <!-- Diagram 1 Container: Corsi-Rosenthal -->
+      <div id="diagram-corsi-view" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-7 bg-slate-950/90 rounded-3xl p-6 border border-slate-800 shadow-inner flex flex-col items-center justify-center relative min-h-[380px]">
+          <div class="absolute top-3 left-4 text-[10px] font-mono text-cyan-400 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            CADR ~ 550 CFM • COST: ~$35 (vs $450 HEPA)
+          </div>
+
+          <!-- Exploded SVG Blueprint -->
+          <svg viewBox="0 0 500 400" class="w-full max-w-md h-auto select-none drop-shadow-2xl">
+            <defs>
+              <linearGradient id="fanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0284c7" />
+                <stop offset="100%" stop-color="#0369a1" />
+              </linearGradient>
+              <linearGradient id="filterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#0d9488" />
+                <stop offset="100%" stop-color="#115e59" />
+              </linearGradient>
+              <linearGradient id="shroudGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#d97706" />
+              </linearGradient>
+            </defs>
+
+            <!-- Exhaust Stream -->
+            <g class="animate-pulse">
+              <path d="M 210 90 Q 230 40 200 10" stroke="#00F59B" stroke-width="3" fill="none" stroke-dasharray="6,4" />
+              <path d="M 250 80 Q 250 25 260 5" stroke="#00E5FF" stroke-width="4" fill="none" stroke-dasharray="8,4" />
+              <path d="M 290 90 Q 270 40 300 10" stroke="#00F59B" stroke-width="3" fill="none" stroke-dasharray="6,4" />
+              <text x="250" y="25" fill="#00F59B" font-size="12" font-weight="bold" text-anchor="middle">CLEAN AIR EXHAUST (550+ CFM)</text>
+            </g>
+
+            <!-- Cardboard Shroud Ring (TOP) -->
+            <g onclick="selectHotspot('shroud')" class="cursor-pointer">
+              <rect id="rect-shroud" x="120" y="90" width="260" height="26" rx="6" fill="url(#shroudGrad)" stroke="#F59E0B" stroke-width="3" />
+              <ellipse cx="250" cy="103" rx="65" ry="8" fill="#0369a1" stroke="#FDE68A" stroke-width="2" stroke-dasharray="3,3" />
+              <text x="250" y="107" fill="#FFF" font-size="11" font-weight="bold" text-anchor="middle">Cardboard Shroud (15" Cutout)</text>
+            </g>
+
+            <!-- 20" Box Fan -->
+            <g onclick="selectHotspot('fan')" class="cursor-pointer">
+              <rect id="rect-fan" x="130" y="125" width="240" height="65" rx="8" fill="url(#fanGrad)" stroke="#0284c7" stroke-width="2" />
+              <circle cx="250" cy="157" r="22" fill="#0f172a" stroke="#38BDF8" stroke-width="2" />
+              <text x="250" y="161" fill="#FFFFFF" font-size="11" font-weight="bold" text-anchor="middle">20" High-Velocity Box Fan</text>
+            </g>
+
+            <!-- MERV-13 Filters -->
+            <g onclick="selectHotspot('filters')" class="cursor-pointer">
+              <polygon id="poly-filters" points="140,200 360,200 375,325 125,325" fill="url(#filterGrad)" stroke="#14B8A6" stroke-width="2" />
+              <line x1="160" y1="205" x2="152" y2="320" stroke="#2DD4BF" stroke-width="1.5" />
+              <line x1="190" y1="205" x2="182" y2="320" stroke="#2DD4BF" stroke-width="1.5" />
+              <line x1="220" y1="205" x2="212" y2="320" stroke="#2DD4BF" stroke-width="1.5" />
+              <line x1="250" y1="205" x2="242" y2="320" stroke="#2DD4BF" stroke-width="1.5" />
+              <line x1="280" y1="205" x2="272" y2="320" stroke="#2DD4BF" stroke-width="1.5" />
+              <line x1="310" y1="205" x2="302" y2="320" stroke="#2DD4BF" stroke-width="1.5" />
+              <line x1="340" y1="205" x2="332" y2="320" stroke="#2DD4BF" stroke-width="1.5" />
+              <text x="250" y="260" fill="#FFFFFF" font-size="13" font-weight="bold" text-anchor="middle">4x MERV-13 Pleated Filters</text>
+              <text x="250" y="280" fill="#CCFBF1" font-size="10" text-anchor="middle">(5-Sided Chamber • 90%+ PM2.5)</text>
+            </g>
+
+            <!-- Base Plate -->
+            <g onclick="selectHotspot('base')" class="cursor-pointer">
+              <polygon id="poly-base" points="115,330 385,330 400,350 100,350" fill="#78350f" stroke="#B45309" stroke-width="1.5" />
+              <text x="250" y="343" fill="#FEF3C7" font-size="10" font-weight="bold" text-anchor="middle">Cardboard Floor & Duct Tape</text>
+            </g>
+
+            <!-- Dirty Air Arrows -->
+            <g class="animate-pulse">
+              <path d="M 60 260 L 115 260" stroke="#FF2A6D" stroke-width="3" />
+              <path d="M 440 260 L 385 260" stroke="#FF2A6D" stroke-width="3" />
+              <text x="85" y="248" fill="#FF2A6D" font-size="9" font-weight="bold" text-anchor="middle">DIRTY PM2.5</text>
+              <text x="415" y="248" fill="#FF2A6D" font-size="9" font-weight="bold" text-anchor="middle">DIRTY PM2.5</text>
+            </g>
+          </svg>
+
+          <span class="text-[11px] text-slate-400 mt-2">💡 Tap any part (Shroud, Fan, Filters, Base) to view engineering specs</span>
+        </div>
+
+        <!-- Hotspot Detail Info -->
+        <div class="lg:col-span-5 space-y-4" id="hotspotDetail">
+          <!-- Filled dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Diagram 2: Inversion Lid -->
+      <div id="diagram-inversion-view" class="hidden space-y-4">
+        <div class="p-5 rounded-3xl bg-slate-950 border border-slate-800 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-black uppercase text-purple-400">Meteorological Physics</span>
+              <h3 class="text-base sm:text-lg font-bold text-white">Winter Thermal Inversion Ceiling vs Solar Convection</h3>
+            </div>
+            <div class="flex items-center gap-3 bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-800">
+              <span class="text-xs text-slate-400">Time of Day:</span>
+              <input type="range" id="inversionSlider" min="5" max="18" value="7" oninput="updateInversion(this.value)" class="w-28 cursor-pointer" />
+              <span id="inversionTimeDisplay" class="text-xs font-mono font-bold text-purple-300 w-16">7:00 AM</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Inversion SVG -->
+          <svg viewBox="0 0 700 240" class="w-full h-auto drop-shadow-xl select-none">
+            <rect x="0" y="0" width="700" height="75" fill="#0369a1" fill-opacity="0.3" />
+            <text x="350" y="35" fill="#bae6fd" font-size="12" font-weight="bold" text-anchor="middle">UPPER TROPOSPHERE (FREE AIRSTREAM)</text>
+
+            <g id="inversionLidGroup">
+              <rect x="0" y="75" width="700" height="40" fill="#f43f5e" fill-opacity="0.6" stroke="#f43f5e" />
+              <text x="350" y="100" fill="#ffe4e6" font-size="12" font-weight="900" text-anchor="middle">⛔ WARM INVERSION CEILING (TRAPS ALL GROUND EXHAUST)</text>
+            </g>
+
+            <rect x="0" y="115" width="700" height="125" fill="#0f172a" />
+            <text id="inversionGroundText" x="350" y="180" fill="#fca5a5" font-size="12" font-weight="bold" text-anchor="middle">FREEZING RADIATIVE GROUND LAYER • TRAPPED TOXIC SMOG (AQI 388)</text>
+            <polygon points="50,230 70,200 90,230 140,190 180,230 220,180 260,230 380,230 410,200 460,230 520,170 580,230" fill="#334155" />
+          </svg>
+
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+            <strong>Why Morning Jogs are Hazardous:</strong> Cold winter nights chill the ground surface while warm air rests on top like an atmospheric lid. Truck exhaust, soot, and dust cannot rise until direct midday sunlight warms the surface after 12:30 PM, triggering vertical convective dispersion.
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagram 3: Lung Soot Deposition -->
+      <div id="diagram-lungs-view" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-6 bg-slate-950 rounded-3xl p-6 border border-slate-800 flex flex-col items-center justify-center">
+          <span class="text-xs font-mono text-rose-400 mb-2">ANATOMICAL DEPOSITION PATHWAYS</span>
+          <svg viewBox="0 0 350 280" class="w-full max-w-xs h-auto select-none">
+            <path d="M 175 30 Q 190 50 175 70" stroke="#f59e0b" stroke-width="6" fill="none" />
+            <text x="210" y="55" fill="#f59e0b" font-size="11" font-weight="bold">Nasal Cavity (PM10)</text>
+            <path d="M 175 70 L 175 130 L 140 170 M 175 130 L 210 170" stroke="#00E5FF" stroke-width="5" fill="none" />
+            <text x="225" y="135" fill="#00E5FF" font-size="11" font-weight="bold">Bronchial Tree</text>
+            <circle cx="120" cy="200" r="26" fill="#FF2A6D" fill-opacity="0.3" stroke="#FF2A6D" stroke-width="2" />
+            <circle cx="230" cy="200" r="26" fill="#FF2A6D" fill-opacity="0.3" stroke="#FF2A6D" stroke-width="2" />
+            <text x="175" y="215" fill="#FF2A6D" font-size="12" font-weight="black" text-anchor="middle">ALVEOLI & BLOOD (PM2.5)</text>
+          </svg>
+          <span class="text-[11px] text-slate-400 mt-2">PM2.5 crosses capillary barriers directly into systemic circulation</span>
+        </div>
+        <div class="lg:col-span-6 space-y-3">
+          <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-200 space-y-1">
+            <span class="font-black uppercase text-rose-400">Irreversible Alveolar Deposition</span>
+            <p>Particles under 2.5 microns bypass nasal hairs and cilia escalators completely, triggering vascular inflammation, plaque destabilization, and pulmonary oxidative stress.</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20">
+              <span class="font-bold text-rose-400">Cloth / Surgical Mask</span>
+              <p class="text-[11px] text-slate-400 mt-1">Leaks 50%-70% around bridge & cheeks. Near-zero protection against fine PM2.5 soot.</p>
+            </div>
+            <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <span class="font-bold text-emerald-400">Fitted N95 / FFP2</span>
+              <p class="text-[11px] text-slate-400 mt-1">Electrostatic meltblown filter captures 95%+ particles down to 0.1 µm with airtight seal.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagram 4: Clean Commute Corridors -->
+      <div id="diagram-corridors-view" class="hidden space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="p-4 rounded-2xl border-2 border-rose-500/40 bg-rose-950/20 text-rose-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-black uppercase">Main Arterial Highway</span>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-rose-500/30">AQI 395</span>
+            </div>
+            <div class="text-base font-extrabold mb-1">0% Reduction (Baseline)</div>
+            <p class="text-xs opacity-80">Heavy diesel truck soot, resuspended road dust, brake wear particulates.</p>
+          </div>
+          <div class="p-4 rounded-2xl border-2 border-amber-500/40 bg-amber-950/20 text-amber-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-black uppercase">Tree Canopy Green Belt</span>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-500/30">AQI 185</span>
+            </div>
+            <div class="text-base font-extrabold mb-1">-53% Soot Inhalation</div>
+            <p class="text-xs opacity-80">Dense foliage acts as physical settling buffer; reduced traffic density.</p>
+          </div>
+          <div class="p-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-950/20 text-emerald-200">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-black uppercase">Underground AC Metro Rail</span>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/30">AQI 42</span>
+            </div>
+            <div class="text-base font-extrabold mb-1">-89% Particulate Load</div>
+            <p class="text-xs opacity-80">Deep sealed tunnels with industrial electrostatic filtration. WHO Safe.</p>
+          </div>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300">
+          💡 <strong>Pro Commuter Tip:</strong> Always turn on <span class="touch-term" onclick="openTerm('Recirculation')">AC Recirculation</span> immediately in vehicular traffic to cut interior PM2.5 by 80%!
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: GENAI PERSONALIZED ACTION PLAN & INDOOR HACKS -->
+    <section id="action-plan" class="space-y-6">
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 border-t-4 border-emerald-500 space-y-4 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">📋</span>
+            <div>
+              <h2 class="text-lg sm:text-xl font-black font-heading text-white">
+                Personalized Low-Emission Action Plan
+              </h2>
+              <p id="planProfileSubtitle" class="text-xs text-slate-400">
+                The AI copilot can tailor routines to the city, commute, budget, and optional household needs you choose.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openChatWithQuery('Create a practical daily clean-air plan for my household. Include a low-emission routine, one indoor-air improvement, one sustainable alternative, and explain the direct impact and any uncertainty for each choice.')" class="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-black">✨ Generate my plan</button>
+            <span id="scoreBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              Tailor your plan in the Copilot
+            </span>
+          </div>
+        </div>
+
+        <!-- Risk Summary Box -->
+        <div class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-start gap-3">
+          <span class="text-rose-400 text-xl">⚠️</span>
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-rose-300">
+              Household Context
+            </h4>
+            <p class="text-xs sm:text-sm text-slate-200 mt-1 leading-relaxed">
+              <span id="householdRiskSummary">No household profile is assumed. Choose optional needs in the Copilot and ask it for advice suited to your family.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plan Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <button onclick="switchPlanTab('routine')" id="tab-routine" class="plan-tab-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-600 text-white shadow-md">
+          ⏰ Daily Routine Timeline
+        </button>
+        <button onclick="switchPlanTab('hacks')" id="tab-hacks" class="plan-tab-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold glass-panel text-slate-300 hover:bg-slate-800">
+          🏡 Indoor Air Quality Hacks
+        </button>
+        <button onclick="switchPlanTab('swaps')" id="tab-swaps" class="plan-tab-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold glass-panel text-slate-300 hover:bg-slate-800">
+          🌱 Sustainable Alternatives
+        </button>
+      </div>
+
+      <!-- Tab 1: Routine Timeline -->
+      <div id="plan-routine-view" class="space-y-4">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Tab 2: Indoor Hacks Grid -->
+      <div id="plan-hacks-view" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Tab 3: Sustainable Swaps -->
+      <div id="plan-swaps-view" class="hidden space-y-4">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 5: COMMUNITY SHIELD & SOS REPORTING -->
+    <section id="community" class="glass-panel rounded-3xl p-6 sm:p-8 shadow-xl border-t-4 border-amber-500 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            <span class="text-xl">📢</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg sm:text-xl font-black font-heading text-white">
+                Community Clean-Air Shield & SOS Action Hub
+              </h2>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                Citizen Watch
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Report open burning, locate community air shelters, and enforce school sports protocols
+            </p>
+          </div>
+        </div>
+
+        <button onclick="openReportModal()" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 active:scale-95 transition-all">
+          <span>🔥</span>
+          <span>Report Open Burning SOS</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Live Incidents -->
+        <div class="space-y-3">
+          <span class="text-xs font-black uppercase text-slate-300 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            Example Community Reports (Demo Data)
+          </span>
+          <div class="space-y-2 text-xs">
+            <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+              <div class="flex items-center justify-between font-bold text-white">
+                <span>Open Garbage Fire</span>
+                <span class="text-[10px] text-slate-400 font-mono">14m ago</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Illustrative example • not a verified incident</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+              <div class="flex items-center justify-between font-bold text-white">
+                <span>Leaf Burning in Park</span>
+                <span class="text-[10px] text-slate-400 font-mono">38m ago</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Illustrative example • not a verified incident</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean Air Shelters -->
+        <div class="space-y-3">
+          <span class="text-xs font-black uppercase text-slate-300">🏛️ Community Clean-Air Shelters</span>
+          <div class="space-y-2 text-xs">
+            <div class="p-3 rounded-2xl bg-cyan-950/30 border border-cyan-800/40 text-cyan-200">
+              <strong>Check local public libraries</strong>
+              <p class="text-[11px] text-slate-400">Ask the venue whether filtered indoor air is available.</p>
+              <span class="text-[10px] font-bold text-emerald-400">Call ahead to confirm access and hours</span>
+            </div>
+            <div class="p-3 rounded-2xl bg-cyan-950/30 border border-cyan-800/40 text-cyan-200">
+              <strong>Check nearby transit stations</strong>
+              <p class="text-[11px] text-slate-400">Ventilation and air quality vary by station.</p>
+              <span class="text-[10px] font-bold text-emerald-400">Confirm local access and operating hours</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- School Flag Protocol -->
+        <div class="space-y-3">
+          <span class="text-xs font-black uppercase text-slate-300">🚩 School AQI Recess Protocol</span>
+          <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2 text-[11px]">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span><strong>Green (0-50):</strong> Full outdoor activities</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span><strong>Yellow (51-100):</strong> Sensitive children take breaks</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+              <span><strong>Red/Maroon (150+):</strong> 100% indoor recess & sports cancelled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: INTERACTIVE WHAT-IF SIMULATOR -->
+    <section id="simulator" class="glass-panel rounded-3xl p-6 sm:p-8 shadow-xl border-t-4 border-teal-500 space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <span class="text-xs font-black uppercase tracking-wider text-teal-400">Physics & CADR Engine</span>
+          <h2 class="text-lg sm:text-xl font-black font-heading text-white">
+            Interactive What-If Impact Simulator
+          </h2>
+        </div>
+        <span class="text-xs text-slate-400">Illustrative scenario estimates, not measured outcomes</span>
+      </div>
+      <p class="text-[10px] text-slate-400">Slider outputs use simplified assumptions and are not validated health or emissions measurements. Ask the copilot for a qualitative explanation tailored to your selected context.</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Sliders -->
+        <div class="lg:col-span-7 space-y-5">
+          <!-- Metro Commute Days -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span class="text-slate-300">Metro Rail Days (Swap Solo Car):</span>
+              <span id="sliderValMetro" class="text-emerald-400 font-mono">3 days/wk</span>
+            </div>
+            <input type="range" id="simMetro" min="0" max="5" value="3" oninput="runSimulation()" class="w-full cursor-pointer" />
+          </div>
+
+          <!-- Purifier Runtime -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span class="text-slate-300">Indoor Air Purifier Run Time:</span>
+              <span id="sliderValPurifier" class="text-cyan-400 font-mono">10 hrs/day</span>
+            </div>
+            <input type="range" id="simPurifier" min="0" max="24" value="10" oninput="runSimulation()" class="w-full cursor-pointer" />
+          </div>
+
+          <!-- N95 Mask Adherence -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs font-bold">
+              <span class="text-slate-300">N95 Mask Adherence Outdoors:</span>
+              <span id="sliderValMask" class="text-rose-400 font-mono">80% fit adherence</span>
+            </div>
+            <input type="range" id="simMask" min="0" max="100" value="80" oninput="runSimulation()" class="w-full cursor-pointer" />
+          </div>
+        </div>
+
+        <!-- Calculated Live Metrics -->
+        <div class="lg:col-span-5 grid grid-cols-2 gap-3">
+          <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-center space-y-1">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Illustrative action score</span>
+            <div id="simOutPm" class="text-2xl sm:text-3xl font-black text-emerald-400 font-heading">-64%</div>
+            <span class="text-[10px] text-emerald-300 font-bold">Not a measured reduction</span>
+          </div>
+          <div class="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/25 text-center space-y-1">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Illustrative indoor AQI scenario</span>
+            <div id="simOutAqi" class="text-2xl sm:text-3xl font-black text-cyan-400 font-heading">38</div>
+            <span class="text-[10px] text-cyan-300 font-bold">Simple estimate; actual results vary</span>
+          </div>
+          <div class="col-span-2 p-3.5 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+            <span class="text-xs text-slate-300">Illustrative commute CO₂ estimate: <strong id="simOutCo2" class="text-emerald-400">11.1 kg / week</strong></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-16 border-t border-slate-800 bg-slate-950/95 py-8 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950 font-black">S</div>
+        <span class="font-extrabold text-slate-200">SaansSaathi (साँस साथी)</span>
+        <span>• Family Clean-Air Copilot</span>
+      </div>
+      <div>Air-quality model: Open-Meteo / CAMS</div>
+    </div>
+  </footer>
+
+  <!-- MODAL 1: HACK DETAIL DIY BLUEPRINT MODAL -->
+  <div id="hackModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl glass-panel p-6 sm:p-8 border-2 border-emerald-500/40 shadow-2xl space-y-5">
+      <button onclick="closeHackModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400">✕</button>
+      <div class="flex items-start gap-3">
+        <span class="text-2xl p-2 rounded-xl bg-emerald-500/20 text-emerald-400">🛠️</span>
+        <div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300" id="hackModalCost">Low-Cost</span>
+          <h3 class="text-xl font-bold font-heading text-white mt-1" id="hackModalTitle">DIY Corsi-Rosenthal Box</h3>
+        </div>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed" id="hackModalDesc"></p>
+      <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-200">
+        <strong>🔬 Scientific Reality:</strong> <span id="hackModalPhysics"></span>
+      </div>
+      <div class="space-y-2">
+        <span class="text-xs font-bold text-slate-300 uppercase">📋 Equipment Checklist:</span>
+        <ul class="text-xs text-slate-400 space-y-1 list-disc pl-5" id="hackModalList">
+          <li>1x 20" Standard Box Fan ($20)</li>
+          <li>4x MERV-13 Pleated HVAC Filters 20"x20" ($25)</li>
+          <li>1x 20" Cardboard Shroud Sheet with 15" diameter hole ($0)</li>
+          <li>1x Roll Heavy-Duty Duct Tape ($4)</li>
+        </ul>
+      </div>
+      <button onclick="closeHackModal()" class="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs">
+        Close & Apply Hack
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 2: 60-SECOND SMOG EMERGENCY CHECKLIST -->
+  <div id="emergencyModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl glass-panel p-6 sm:p-8 border-2 border-rose-500/50 shadow-2xl space-y-5">
+      <button onclick="closeEmergencyModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400">✕</button>
+      <div class="flex items-center gap-3">
+        <span class="text-2xl p-2 rounded-xl bg-rose-500/20 text-rose-400 animate-pulse">🚨</span>
+        <div>
+          <span class="text-[10px] font-black uppercase text-rose-400">Red Alert Smog Protocol</span>
+          <h3 class="text-xl font-bold font-heading text-white">60-Second Winter Smog Defense</h3>
+        </div>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-bold text-slate-200">1. Seal Window Gaps: Pack rolled damp towels firmly along all exterior window sills.</div>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-bold text-slate-200">2. Run Bedroom CADR at Maximum: Position air cleaner 1.5m from breathing zone.</div>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-bold text-slate-200">3. Follow each person’s existing care plan. For urgent breathing symptoms, contact a qualified health professional or local emergency service.</div>
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-bold text-slate-200">4. Zero Frying & Broom Sweeping: Wet mop floors only to prevent soot aerosolization.</div>
+      </div>
+      <div class="flex items-center justify-between gap-3">
+        <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-300">🖨️ Print Checklist</button>
+        <button onclick="closeEmergencyModal()" class="px-5 py-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs">Acknowledge</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: REPORT OPEN BURNING SOS -->
+  <div id="reportModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="relative w-full max-w-md rounded-3xl glass-panel p-6 sm:p-8 border-2 border-amber-500/50 shadow-2xl space-y-4">
+      <button onclick="closeReportModal()" class="absolute top-5 right-5 p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400">✕</button>
+      <div class="flex items-center gap-3">
+        <span class="text-2xl p-2 rounded-xl bg-amber-500/20 text-amber-400">🔥</span>
+        <div>
+          <span class="text-[10px] font-black uppercase text-amber-400">Citizen SOS Watch</span>
+          <h3 class="text-xl font-bold font-heading text-white">Report Open Burning</h3>
+        </div>
+      </div>
+      <p class="text-xs text-slate-300">Open garbage and leaf burning release polycyclic aromatic hydrocarbons directly at breathing level.</p>
+      <div class="space-y-2 text-xs">
+        <label class="block font-bold text-slate-300">Incident Category:</label>
+        <select class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200">
+          <option>Municipal Garbage Fire</option>
+          <option>Dry Leaf Pile Burning</option>
+          <option>Plastic / Rubber Smolder</option>
+          <option>Crop Stubble Smoke</option>
+        </select>
+        <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-emerald-400 font-mono">
+          📍 No location is collected or shared by this demo form.
+        </div>
+      </div>
+        <button onclick="submitReportSOS()" class="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs">
+        Show local reporting guidance
+      </button>
+    </div>
+  </div>
+
+  <!-- SLIDE-OVER: COPILOT AI CHAT -->
+  <div id="chatSlideOver" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-slate-950 border-l border-slate-800 p-6 flex flex-col justify-between hidden shadow-2xl">
+    <div>
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500 text-slate-950 font-black flex items-center justify-center">AI</div>
+          <div>
+            <h3 class="text-sm font-bold text-white">SaansSaathi AI Copilot</h3>
+          <span id="aiConnectionStatus" class="text-[10px] text-emerald-400 font-mono">Ready to connect</span>
+          </div>
+        </div>
+        <button onclick="closeChat()" class="p-1.5 rounded-lg bg-slate-900 text-slate-400">✕</button>
+      </div>
+      <div class="my-3 p-3 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+        <p class="text-[11px] font-bold text-slate-200">Personalize for your household</p>
+        <div class="flex gap-2">
+          <input id="cityInput" type="text" maxlength="100" autocomplete="off" placeholder="City, country (e.g. Delhi, India)" class="min-w-0 flex-1 p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-emerald-500" />
+          <button id="loadAirButton" onclick="loadAirQualityForCity()" class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-[11px]">Load AQI</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="text-[10px] text-slate-300">Main commute
+            <select id="commuteMode" class="mt-1 w-full p-2 rounded-lg bg-slate-950 border border-slate-700 text-[11px] text-white">
+              <option value="public transit">Public transit</option><option value="car">Car</option><option value="motorcycle">Motorcycle</option><option value="walking or cycling">Walking / cycling</option><option value="mostly at home">Mostly at home</option><option value="mixed or other">Mixed / other</option>
+            </select>
+          </label>
+          <label class="text-[10px] text-slate-300">Budget for changes
+            <select id="budgetLevel" class="mt-1 w-full p-2 rounded-lg bg-slate-950 border border-slate-700 text-[11px] text-white">
+              <option value="no-cost ideas first">No-cost ideas first</option><option value="low-cost options">Low-cost options</option><option value="flexible budget">Flexible budget</option>
+            </select>
+          </label>
+        </div>
+        <div class="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-300">
+          <label class="flex items-center gap-1.5"><input class="profileNeed" type="checkbox" value="children or an infant at home" /> Children / infant</label>
+          <label class="flex items-center gap-1.5"><input class="profileNeed" type="checkbox" value="an older adult at home" /> Older adult</label>
+          <label class="flex items-center gap-1.5"><input class="profileNeed" type="checkbox" value="someone with asthma or respiratory sensitivity at home" /> Respiratory sensitivity</label>
+          <label class="flex items-center gap-1.5"><input class="profileNeed" type="checkbox" value="someone with heart or lung vulnerability at home" /> Heart / lung needs</label>
+        </div>
+        <p id="airLoadStatus" class="text-[10px] text-slate-400">City lookup is optional. No precise GPS is requested.</p>
+        <p class="text-[9px] leading-relaxed text-slate-400">When you load a city, the city is looked up with Open-Meteo. When you ask AI, your question, chosen household options, city and air readings are sent to the AI service to form a reply. Don’t enter names, exact addresses, or personal medical details.</p>
+      </div>
+      <!-- Messages List -->
+      <div id="chatMessages" class="py-4 space-y-3 max-h-[65vh] overflow-y-auto text-xs">
+        <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-200 leading-relaxed">
+          Hi! I’m your Family Clean-Air Copilot. Load a city for a modeled air-quality estimate, then ask a question. I can tailor suggestions to the household options you choose above.
+        </div>
+      </div>
+    </div>
+    <!-- Input Form -->
+    <div class="space-y-2 pt-2 border-t border-slate-800">
+      <div class="flex items-center gap-2">
+        <input id="chatInput" type="text" placeholder="Ask about child safety or hacks..." class="flex-1 p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500" onkeydown="if(event.key==='Enter') sendChat()" />
+        <button id="sendChatButton" onclick="sendChat()" class="px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs">Send</button>
+      </div>
+      <p class="text-[9px] text-slate-500">⚠️ Environmental guidance only, not medical advice. City, selected preferences, air readings, and chat are sent to the AI service when you ask. Don’t share identifying or medical details.</p>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT ENGINE (Standalone, Zero Dependencies) -->
+  <script>
+    // --- 1. Web Audio API Sound Synthesizer ---
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx && window.AudioContext) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playClickSound() {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    function playSuccessChime() {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+          gain.gain.setValueAtTime(0.05, now + idx * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.07);
+          osc.stop(now + idx * 0.07 + 0.25);
+        });
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      playClickSound();
+      document.getElementById('audioToggleBtn').classList.toggle('text-slate-500', !audioEnabled);
+      document.getElementById('audioToggleBtn').classList.toggle('text-emerald-400', audioEnabled);
+    }
+
+    // --- 2. Real-time Atmospheric Particle Canvas Simulation ---
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    let particles = [];
+    for (let i = 0; i < 75; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.7,
+        vy: (Math.random() - 0.5) * 0.7,
+        size: Math.random() * 2.5 + 1,
+        isClean: Math.random() > 0.7,
+      });
+    }
+
+    function renderParticles() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.isClean ? 'rgba(0, 245, 155, 0.35)' : 'rgba(255, 42, 109, 0.3)';
+        ctx.fill();
+      });
+      requestAnimationFrame(renderParticles);
+    }
+    renderParticles();
+
+    // --- 3. 5 Operational Defense Modes Engine ---
+    const MODES = [
+      {
+        id: 'severe_smog',
+        name: 'Red Alert Smog',
+        tag: 'AQI 300-500+ Emergency',
+        color: 'border-rose-500 bg-rose-950/20 text-rose-300',
+        summary: 'Thermal inversion lockdown protocol. Max CADR filtration, damp window sealing, emergency inhaler checks, and zero morning exercise.',
+        directives: [
+          'Seal window sills with damp rolled towels to block 40% particulate infiltration',
+          'Zero outdoor morning jogs; thermal inversion ceiling traps toxic soot until noon',
+          'N95 mask with airtight seal required outdoors; inspect edge leakage'
+        ]
+      },
+      {
+        id: 'pediatric_guard',
+        name: 'Pediatric & High-Risk Guard',
+        tag: 'Children, Asthma & Elderly',
+        color: 'border-purple-500 bg-purple-950/20 text-purple-300',
+        summary: 'Tailored for rapid infant respiratory rates and hyper-reactive asthmatic airways. Nursery microclimate isolation and school advisory alerts.',
+        directives: [
+          'NEVER mask children under 2 (suffocation risk); use clean filtered rooms and stroller covers',
+          'Children breathe 2x faster per kg body weight; enforce indoor play when AQI > 180',
+          'Keep fast-acting bronchodilator (albuterol) and spacer at bedside'
+        ]
+      },
+      {
+        id: 'eco_commuter',
+        name: 'Eco-Commuter & Urban Pro',
+        tag: 'Clean Routes & Transit',
+        color: 'border-emerald-500 bg-emerald-950/20 text-emerald-300',
+        summary: 'Optimizes daily commutes via clean corridors, AC recirculation, and electric/metro transit swaps to minimize lung soot deposition.',
+        directives: [
+          'Switch car AC to Recirculation Mode immediately in traffic (-80% particulate entry)',
+          'Swap solo car to Metro Rail: avoids 18.4 kg CO₂/week & cuts exposure by 55%',
+          'Choose tree-canopy arterial bypasses over diesel truck highways'
+        ]
+      },
+      {
+        id: 'community_shield',
+        name: 'Community Shield & Anti-Burn',
+        tag: 'Citizen Action & Reporting',
+        color: 'border-amber-500 bg-amber-950/20 text-amber-300',
+        summary: 'Mobilize neighborhoods to fight urban smog. Open burning SOS reporting, collective DIY box-fan builds, and clean-air public shelters.',
+        directives: [
+          '1-Click photo reporting of open leaf/garbage burning directly to municipal control',
+          'Organize neighborhood Corsi-Rosenthal build workshops ($35 vs $400 purifiers)',
+          'Designate community clean-air shelters in local libraries with industrial scrubbers'
+        ]
+      },
+      {
+        id: 'night_sanctuary',
+        name: 'Night Sanctuary & Recovery',
+        tag: '8-Hr Alveolar Sleep Repair',
+        color: 'border-blue-500 bg-blue-950/20 text-blue-300',
+        summary: 'Optimizes overnight sleep sanctuary to allow pulmonary cilia to purge deposited soot while keeping bedroom AQI below 15.',
+        directives: [
+          'Position HEPA/box-fan 1.5m away, blowing clean air directly across sleep breathing zone',
+          'Maintain 40%-50% humidity to prevent airway mucosal drying and cilia paralysis',
+          'Seal bedroom tightly before 4:00 AM when cold dawn inversion settles'
+        ]
+      }
+    ];
+
+    let activeMode = 'severe_smog';
+
+    function renderModes() {
+      const container = document.getElementById('modesContainer');
+      container.innerHTML = MODES.map(m => {
+        const isActive = m.id === activeMode;
+        return `
+          <button onclick="setMode('${m.id}')" class="p-3.5 rounded-2xl text-left transition-all border-2 ${isActive ? m.color + ' ring-2 ring-white/20' : 'glass-panel text-slate-300 border-slate-800 hover:border-slate-700'}">
+            <div class="text-xs sm:text-sm font-extrabold font-heading leading-snug">${m.name}</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">${m.tag}</div>
+            ${isActive ? '<div class="mt-2 text-[10px] font-bold text-emerald-400">✓ ACTIVE PRESET</div>' : ''}
+          </button>
+        `;
+      }).join('');
+
+      const cur = MODES.find(m => m.id === activeMode);
+      document.getElementById('headerModeText').innerText = cur.name;
+      document.getElementById('activeModeBanner').innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-xs font-black uppercase text-white">Active Defense Preset: ${cur.name}</div>
+            <p class="text-xs text-slate-300 mt-0.5">${cur.summary}</p>
+          </div>
+          <button onclick="openEmergencyModal()" class="px-3.5 py-2 rounded-xl bg-rose-600 text-white font-extrabold text-xs shadow-md shrink-0">
+            60s Smog Protocol
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-2 border-t border-slate-800 text-xs">
+          ${cur.directives.map((d, i) => `
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200">
+              <strong class="text-emerald-400">0${i+1}</strong>: ${d}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function setMode(modeId) {
+      playClickSound();
+      activeMode = modeId;
+      renderModes();
+    }
+
+    function readActiveModeVoice() {
+      playClickSound();
+      const cur = MODES.find(m => m.id === activeMode);
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const ut = new SpeechSynthesisUtterance(`${cur.name}. ${cur.summary}`);
+        window.speechSynthesis.speak(ut);
+      }
+    }
+
+    // --- 4. Key Pollutants Grid ---
+    let airQualityData = null;
+    let airQualityLocation = null;
+    const chatHistory = [];
+
+    function formatPollutant(value) {
+      return Number.isFinite(value) ? (value < 10 ? value.toFixed(1) : Math.round(value).toString()) : '—';
+    }
+
+    function aqiBand(value) {
+      if (value == null || !Number.isFinite(value)) return { label: 'No city loaded', text: 'text-slate-400', badge: 'bg-slate-500/20 text-slate-400 border-slate-500/40' };
+      if (value <= 50) return { label: 'Good', text: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' };
+      if (value <= 100) return { label: 'Moderate', text: 'text-amber-400', badge: 'bg-amber-500/20 text-amber-400 border-amber-500/40' };
+      if (value <= 150) return { label: 'Unhealthy for sensitive groups', text: 'text-orange-400', badge: 'bg-orange-500/20 text-orange-400 border-orange-500/40' };
+      if (value <= 200) return { label: 'Unhealthy', text: 'text-rose-400', badge: 'bg-rose-500/20 text-rose-400 border-rose-500/40' };
+      if (value <= 300) return { label: 'Very unhealthy', text: 'text-rose-500', badge: 'bg-rose-500/20 text-rose-400 border-rose-500/40' };
+      return { label: 'Hazardous', text: 'text-red-600', badge: 'bg-red-500/20 text-red-500 border-red-500/40' };
+    }
+
+    function updateAirQualityDashboard() {
+      const value = airQualityData?.us_aqi;
+      const band = aqiBand(value);
+      document.getElementById('aqiLocation').textContent = airQualityLocation || 'Load a city in the Copilot';
+      document.getElementById('aqiValue').textContent = Number.isFinite(value) ? Math.round(value) : '—';
+      document.getElementById('aqiValue').className = `text-5xl font-black font-heading tracking-tight ${band.text}`;
+      document.getElementById('aqiCategory').textContent = band.label;
+      document.getElementById('aqiCategory').className = `text-xs font-bold uppercase tracking-wider mt-1 ${band.text}`;
+      const badge = document.getElementById('aqiStatusBadge');
+      badge.textContent = Number.isFinite(value) ? `${band.label} · U.S. AQI ${Math.round(value)}` : 'Waiting for city';
+      badge.className = `px-2.5 py-0.5 rounded-full text-xs font-black border ${band.badge}`;
+      document.getElementById('pm25Current').textContent = `PM2.5: ${formatPollutant(airQualityData?.pm2_5)} µg/m³`;
+      document.getElementById('aqiDataNote').textContent = airQualityData
+        ? `Open-Meteo/CAMS modeled estimate as of ${airQualityData.time || 'latest available model time'}; not a ground-monitor reading.`
+        : 'Choose a city in the Copilot to load a modeled air-quality estimate.';
+      document.getElementById('pollutantSourceLabel').textContent = airQualityData
+        ? `Modeled readings · ${airQualityData.time || 'latest available'}`
+        : 'Load a city to view modeled concentrations';
+      renderPollutants();
+      syncHouseholdSummary();
+    }
+
+    function syncHouseholdSummary() {
+      const selectedNeeds = Array.from(document.querySelectorAll('.profileNeed:checked')).map((item) => item.value);
+      const parts = [];
+      if (airQualityData && Number.isFinite(airQualityData.us_aqi)) {
+        parts.push(`${airQualityLocation}: modeled U.S. AQI ${Math.round(airQualityData.us_aqi)} (${aqiBand(airQualityData.us_aqi).label})`);
+      } else {
+        parts.push('No city air-quality estimate is loaded');
+      }
+      parts.push(`commute: ${document.getElementById('commuteMode').value}`);
+      parts.push(`budget: ${document.getElementById('budgetLevel').value}`);
+      if (selectedNeeds.length) parts.push(`chosen household needs: ${selectedNeeds.join(', ')}`);
+      document.getElementById('householdRiskSummary').textContent = `${parts.join(' · ')}. The copilot uses this context when you ask it a question.`;
+    }
+
+    async function loadAirQualityForCity() {
+      const input = document.getElementById('cityInput');
+      const button = document.getElementById('loadAirButton');
+      const status = document.getElementById('airLoadStatus');
+      const cityQuery = input.value.trim();
+      if (cityQuery.length < 2) {
+        status.textContent = 'Enter a city and country (at least 2 characters).';
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = 'Loading…';
+      status.textContent = 'Looking up the city and its modeled air quality…';
+      try {
+        const geoUrl = new URL('https://geocoding-api.open-meteo.com/v1/search');
+        geoUrl.search = new URLSearchParams({ name: cityQuery, count: '1', language: 'en', format: 'json' });
+        const geoResponse = await fetch(geoUrl);
+        if (!geoResponse.ok) throw new Error('Could not look up that city. Check the spelling and try again.');
+        const geoResult = await geoResponse.json();
+        const place = geoResult.results?.[0];
+        if (!place) throw new Error('No matching city found. Try including the country, such as “Delhi, India”.');
+
+        const airUrl = new URL('https://air-quality-api.open-meteo.com/v1/air-quality');
+        airUrl.search = new URLSearchParams({
+          latitude: String(place.latitude),
+          longitude: String(place.longitude),
+          current: 'us_aqi,pm2_5,pm10,nitrogen_dioxide,ozone,carbon_monoxide,sulphur_dioxide',
+          timezone: 'auto',
+        });
+        const airResponse = await fetch(airUrl);
+        if (!airResponse.ok) throw new Error('Air-quality estimates are unavailable for that city right now.');
+        const airResult = await airResponse.json();
+        if (!airResult.current) throw new Error('The air-quality service did not return a current model estimate.');
+
+        const current = airResult.current;
+        airQualityLocation = [place.name, place.admin1, place.country].filter(Boolean).join(', ');
+        airQualityData = {
+          us_aqi: current.us_aqi,
+          pm2_5: current.pm2_5,
+          pm10: current.pm10,
+          nitrogen_dioxide: current.nitrogen_dioxide,
+          ozone: current.ozone,
+          carbon_monoxide: current.carbon_monoxide,
+          sulphur_dioxide: current.sulphur_dioxide,
+          time: current.time,
+          timezone: airResult.timezone,
+          source: 'Open-Meteo / CAMS model estimate',
+        };
+        updateAirQualityDashboard();
+        runSimulation();
+        status.textContent = `Loaded modeled air-quality estimate for ${airQualityLocation}. Forecast quality and update timing vary by region.`;
+      } catch (error) {
+        status.textContent = error.message || 'Could not load air quality. Please try again.';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Load AQI';
+      }
+    }
+
+    function renderPollutants() {
+      const container = document.getElementById('pollutantGrid');
+      const pollutants = [
+        { name: 'PM2.5', value: airQualityData?.pm2_5 },
+        { name: 'PM10', value: airQualityData?.pm10 },
+        { name: 'NO₂', value: airQualityData?.nitrogen_dioxide },
+        { name: 'Ozone (O₃)', value: airQualityData?.ozone },
+        { name: 'CO', value: airQualityData?.carbon_monoxide },
+        { name: 'SO₂', value: airQualityData?.sulphur_dioxide },
+      ];
+      container.innerHTML = pollutants.map(p => `
+        <div class="p-3.5 rounded-2xl glass-panel border border-slate-800">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-slate-300">${p.name}</span>
+            <span class="px-1.5 py-0.2 rounded text-[10px] font-bold text-cyan-400 bg-cyan-500/10">${airQualityData ? 'Model estimate' : 'Load city'}</span>
+          </div>
+          <div class="text-xl font-black font-heading text-white mt-1">${formatPollutant(p.value)} <span class="text-[10px] text-slate-400">µg/m³</span></div>
+        </div>
+      `).join('');
+    }
+
+    // --- 5. Interactive Diagrams Lab Engine ---
+    function switchDiagram(tab) {
+      playClickSound();
+      ['corsi', 'inversion', 'lungs', 'corridors'].forEach(t => {
+        document.getElementById(`tab-${t}`).className = t === tab
+          ? 'diagram-tab-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-md'
+          : 'diagram-tab-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold glass-panel text-slate-300 hover:bg-slate-800';
+        document.getElementById(`diagram-${t}-view`).classList.toggle('hidden', t !== tab);
+      });
+    }
+
+    const HOTSPOTS = {
+      shroud: {
+        title: 'Cardboard Shroud Ring (15" Cutout)',
+        tag: '+40% Clean Air Delivery Rate',
+        desc: 'Fan blades naturally generate high-velocity backpressure vortexes at the blade tips. Without this cardboard shroud, up to 40% of the exhaust air recirculates backward into fan corners.',
+        diy: 'Cut a 20" square cardboard sheet, draw a 15-inch circle in center, cut it out, and duct-tape it airtight directly to fan front.'
+      },
+      fan: {
+        title: '20" High-Velocity Box Fan',
+        tag: 'Low Backpressure Prime Mover',
+        desc: 'Oriented to exhaust vertically into the ceiling. The massive surface area of 4 pleated filters reduces backpressure so the motor runs cool, whisper-quiet at 48 dBA.',
+        diy: 'Run on Speed 1 or 2 overnight for continuous bedroom smoke clearance at ~55 Watts power.'
+      },
+      filters: {
+        title: '4x MERV-13 Pleated HVAC Filters',
+        tag: '90%+ Fine PM2.5 Capture',
+        desc: 'Arranged in a 5-sided cube with airflow arrows pointing inward. Over 48 square feet of pleated media guarantees over 6 months of continuous smoke filtration without ozone emission.',
+        diy: 'Inspect pleats every 30 days. When dark gray, vacuum outer face gently or replace.'
+      },
+      base: {
+        title: 'Cardboard Floor & Duct Tape Seals',
+        tag: 'Zero Leakage Enclosure',
+        desc: 'The bottom cardboard plate ensures all intake air is vacuumed through the MERV-13 filters rather than suctioning dusty floor grit.',
+        diy: 'Seal every corner seam with two layers of heavy-duty duct tape.'
+      }
+    };
+
+    function selectHotspot(key) {
+      playClickSound();
+      const h = HOTSPOTS[key];
+      document.getElementById('hotspotDetail').innerHTML = `
+        <div class="p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500/30 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black uppercase text-amber-400">Blueprint Component</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300">${h.tag}</span>
+          </div>
+          <h3 class="text-lg font-bold font-heading text-white">${h.title}</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">${h.desc}</p>
+          <div class="p-2.5 rounded-xl bg-slate-900 text-amber-300 text-xs font-mono">
+            💡 <strong>DIY Instruction:</strong> ${h.diy}
+          </div>
+        </div>
+      `;
+    }
+
+    function updateInversion(val) {
+      const timeNum = parseInt(val);
+      const display = timeNum <= 12 ? `${timeNum}:00 AM` : `${timeNum - 12}:00 PM`;
+      document.getElementById('inversionTimeDisplay').innerText = display;
+      const isSafe = timeNum >= 12 && timeNum <= 16;
+      document.getElementById('inversionLidGroup').innerHTML = isSafe
+        ? `<rect x="0" y="75" width="700" height="40" fill="#10b981" fill-opacity="0.3" stroke="#10b981" stroke-dasharray="6,4" />
+           <text x="350" y="100" fill="#a7f3d0" font-size="12" font-weight="900" text-anchor="middle">✓ SOLAR MIXING BREAK: CONVECTIVE DISPERSION OPEN (SAFE WINDOW)</text>`
+        : `<rect x="0" y="75" width="700" height="40" fill="#f43f5e" fill-opacity="0.6" stroke="#f43f5e" />
+           <text x="350" y="100" fill="#ffe4e6" font-size="12" font-weight="900" text-anchor="middle">⛔ WARM INVERSION CEILING (TRAPS ALL GROUND EXHAUST)</text>`;
+      document.getElementById('inversionGroundText').innerText = isSafe
+        ? 'GROUND WARMS → SMOG DILUTES RAPIDLY (AQI DROPS TO ~180)'
+        : 'FREEZING RADIATIVE GROUND LAYER • TRAPPED TOXIC SMOG (AQI 388)';
+    }
+
+    // --- 6. Personalized Action Plan & Hacks Data ---
+    const ROUTINE = [
+      {
+        time: '7:00 AM – 9:00 AM',
+        title: 'Morning Thermal Inversion Lockdown',
+        desc: 'Keep all exterior balconies and windows sealed tight. Morning radiative cold traps vehicle diesel soot at ground level. Deploy Corsi-Rosenthal unit on medium speed in nursery.',
+        impact: '-75% Morning Soot Load'
+      },
+      {
+        time: '1:30 PM – 3:00 PM',
+        title: 'Strategic Midday Convective Air Flush',
+        desc: 'Direct solar heating breaks the surface thermal inversion lid, diluting ambient particulates. Safest window for rapid 15-minute cross-ventilation before afternoon rush hour.',
+        impact: 'Dilutes Indoor CO₂ to < 700 ppm'
+      },
+      {
+        time: '6:00 PM – 7:30 PM',
+        title: 'Evening Commute In-Cabin AC Recirculation',
+        desc: 'Before merging into traffic or highway corridors, immediately switch climate control to Recirculation Mode to block bumper-to-bumper diesel exhaust infiltration.',
+        impact: 'Cuts In-Transit PM2.5 by 80%'
+      },
+      {
+        time: '10:00 PM – 6:00 AM',
+        title: 'Night Sleep Microclimate Regeneration',
+        desc: 'Position bedroom purifier 1.5 meters from headboard, pointing clean filtered airflow across the sleep breathing zone to enable pulmonary cilia alveolar recovery.',
+        impact: 'Maintains Sleep AQI < 15'
+      }
+    ];
+
+    const HACKS = [
+      {
+        title: 'Microfiber Wet Mopping (Anti-Resuspension)',
+        cost: 'Free ($0 / ₹0)',
+        eff: 'High',
+        desc: 'Wiping hard floors with a damp microfiber cloth captures settled particulate matter rather than launching microscopic aerosols back into the breathing zone like dry brooms.',
+        physics: 'Stokes Law of particle settling: dry sweeping creates aerodynamic turbulence that re-suspends fine PM2.5 for up to 6 hours.'
+      },
+      {
+        title: 'DIY Corsi-Rosenthal MERV-13 Box Fan Filter',
+        cost: 'Low-Cost ($35 / ₹2,800)',
+        eff: 'Maximum',
+        desc: 'Engineered cube of 4 MERV-13 pleated filters attached to a 20" box fan with a cardboard shroud ring. Produces up to 600 CFM CADR at 1/10th the price of commercial purifiers.',
+        physics: 'High surface media area minimizes backpressure and maximizes clean air volume delivery per watt consumed.'
+      },
+      {
+        title: 'Damp Towel Window Weatherstripping',
+        cost: 'Low-Cost ($2 / ₹150)',
+        eff: 'High',
+        desc: 'Rolling damp cotton bath towels along drafty door sweeps and window sills creates an electrostatic particulate barrier that traps up to 40% of infiltrating outdoor smog.',
+        physics: 'Moisture creates capillary surface tension that captures passing aerosol particulates.'
+      },
+      {
+        title: 'Kitchen Range Hood Exhaust Timing',
+        cost: 'Free ($0 / ₹0)',
+        eff: 'Very High',
+        desc: 'Run range hood exhaust on maximum 2 minutes BEFORE igniting gas burners and keep running for 5 minutes after cooking to eliminate indoor NO2 and ultrafine oil aerosol spikes.',
+        physics: 'Unvented gas stoves generate up to 400 µg/m³ NO2, triggering rapid childhood asthma flare-ups.'
+      }
+    ];
+
+    const SWAPS = [
+      {
+        current: 'Solo Petrol/Diesel Car Commute (15 km)',
+        alt: 'Underground Electric Metro Rail',
+        co2: '18.4 kg CO₂ / week avoided',
+        exposure: '-68% PM2.5 Inhalation Reduced'
+      },
+      {
+        current: 'Open Gas Stove High-Heat Frying',
+        alt: 'Induction Cooktop & Steam/Bake Technique',
+        co2: '4.2 kg CO₂ / week avoided',
+        exposure: 'Zero Indoor NO₂ Combustion Spikes'
+      }
+    ];
+
+    function renderPlan() {
+      // Routine
+      document.getElementById('plan-routine-view').innerHTML = ROUTINE.map((r, i) => `
+        <div class="p-5 rounded-3xl glass-panel border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black uppercase text-emerald-400 font-mono">${r.time}</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">${r.impact}</span>
+          </div>
+          <h3 class="text-base font-bold text-white">${r.title}</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">${r.desc}</p>
+        </div>
+      `).join('');
+
+      // Hacks
+      document.getElementById('plan-hacks-view').innerHTML = HACKS.map((h, i) => `
+        <div class="p-5 rounded-3xl glass-panel border border-slate-800 flex flex-col justify-between space-y-3">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300">${h.cost}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300">${h.eff} Effectiveness</span>
+            </div>
+            <h3 class="text-base font-bold text-white mt-2">${h.title}</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">${h.desc}</p>
+          </div>
+          <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+            <button onclick="openHackModalIndex(${i})" class="px-3 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-xs font-bold">
+              🛠️ Blueprint & Guide
+            </button>
+            <button onclick="markActionDone(this)" class="text-xs font-bold text-emerald-400">
+              Mark Done ✓
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      // Swaps
+      document.getElementById('plan-swaps-view').innerHTML = SWAPS.map(s => `
+        <div class="p-5 rounded-3xl glass-panel border border-slate-800 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20">
+              <span class="text-[10px] font-bold uppercase text-rose-400">Current High-Emission Habit</span>
+              <p class="font-bold text-white mt-1">${s.current}</p>
+            </div>
+            <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+              <span class="text-[10px] font-bold uppercase text-emerald-400">Clean Sustainable Alternative</span>
+              <p class="font-bold text-white mt-1">${s.alt}</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-400 font-mono pt-2 border-t border-slate-800">
+            <span>🌱 ${s.co2}</span>
+            <span class="text-emerald-400 font-bold">${s.exposure}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function switchPlanTab(tab) {
+      playClickSound();
+      ['routine', 'hacks', 'swaps'].forEach(t => {
+        document.getElementById(`tab-${t}`).className = t === tab
+          ? 'plan-tab-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-600 text-white shadow-md'
+          : 'plan-tab-btn flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold glass-panel text-slate-300 hover:bg-slate-800';
+        document.getElementById(`plan-${t}-view`).classList.toggle('hidden', t !== tab);
+      });
+    }
+
+    function markActionDone(btn) {
+      playSuccessChime();
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 }, colors: ['#00F59B', '#00E5FF', '#FFB703'] });
+      btn.innerText = 'Completed ✓';
+      btn.className = 'text-xs font-bold text-emerald-400 opacity-60';
+    }
+
+    // --- 7. What-If Simulator Live Engine ---
+    function runSimulation() {
+      const metro = parseInt(document.getElementById('simMetro').value);
+      const purifier = parseInt(document.getElementById('simPurifier').value);
+      const mask = parseInt(document.getElementById('simMask').value);
+
+      document.getElementById('sliderValMetro').innerText = `${metro} days/wk`;
+      document.getElementById('sliderValPurifier').innerText = `${purifier} hrs/day`;
+      document.getElementById('sliderValMask').innerText = `${mask}% adherence`;
+
+      // Live calculation
+      const pmReduction = Math.min(92, Math.round((metro * 4) + (purifier * 2.5) + (mask * 0.35)));
+      const indoorAqi = Number.isFinite(airQualityData?.us_aqi)
+        ? Math.max(0, Math.round(airQualityData.us_aqi * (1 - (purifier * 0.025))))
+        : null;
+      const co2Avoided = (metro * 3.7).toFixed(1);
+
+      document.getElementById('simOutPm').innerText = `-${pmReduction}%`;
+      document.getElementById('simOutAqi').innerText = indoorAqi == null ? '—' : indoorAqi;
+      document.getElementById('simOutCo2').innerText = `${co2Avoided} kg / week`;
+    }
+
+    // --- 8. Modals Management ---
+    function openHackModalIndex(idx) {
+      playClickSound();
+      const h = HACKS[idx];
+      document.getElementById('hackModalTitle').innerText = h.title;
+      document.getElementById('hackModalCost').innerText = h.cost;
+      document.getElementById('hackModalDesc').innerText = h.desc;
+      document.getElementById('hackModalPhysics').innerText = h.physics;
+      document.getElementById('hackModal').classList.remove('hidden');
+      document.getElementById('hackModal').classList.add('flex');
+    }
+    function closeHackModal() {
+      playClickSound();
+      document.getElementById('hackModal').classList.add('hidden');
+      document.getElementById('hackModal').classList.remove('flex');
+    }
+
+    function openEmergencyModal() {
+      playClickSound();
+      document.getElementById('emergencyModal').classList.remove('hidden');
+      document.getElementById('emergencyModal').classList.add('flex');
+    }
+    function closeEmergencyModal() {
+      playClickSound();
+      document.getElementById('emergencyModal').classList.add('hidden');
+      document.getElementById('emergencyModal').classList.remove('flex');
+    }
+
+    function openReportModal() {
+      playClickSound();
+      document.getElementById('reportModal').classList.remove('hidden');
+      document.getElementById('reportModal').classList.add('flex');
+    }
+    function closeReportModal() {
+      playClickSound();
+      document.getElementById('reportModal').classList.add('hidden');
+      document.getElementById('reportModal').classList.remove('flex');
+    }
+
+    function submitReportSOS() {
+      playClickSound();
+      alert('This demo does not send reports or collect your location. Please use your local authority’s official reporting service if you need to report an incident.');
+      closeReportModal();
+    }
+
+    // --- 9. Touch-to-Explain Term Popover ---
+    function openTerm(term) {
+      playClickSound();
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        const ut = new SpeechSynthesisUtterance(term + ": Fine particulate matter that bypasses nasal cilia and penetrates deep into pulmonary alveoli.");
+        window.speechSynthesis.speak(ut);
+      }
+      openChatWithQuery(`Explain the health and atmospheric impact of ${term} during winter smog and how our family can protect ourselves.`);
+    }
+
+    // --- 10. Copilot Chat Assistant ---
+    function openChat() {
+      playClickSound();
+      document.getElementById('chatSlideOver').classList.remove('hidden');
+    }
+    function closeChat() {
+      playClickSound();
+      document.getElementById('chatSlideOver').classList.add('hidden');
+    }
+    function openChatWithQuery(query) {
+      openChat();
+      document.getElementById('chatInput').value = query;
+      sendChat();
+    }
+
+    function appendChatMessage(text, role) {
+      const message = document.createElement('div');
+      message.className = role === 'user'
+        ? 'p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-right whitespace-pre-wrap break-words'
+        : 'p-3 rounded-2xl bg-slate-900 border border-slate-800 text-slate-200 leading-relaxed whitespace-pre-wrap break-words';
+      if (role === 'assistant') {
+        const label = document.createElement('strong');
+        label.textContent = 'SaansSaathi AI: ';
+        message.appendChild(label);
+      }
+      message.appendChild(document.createTextNode(text));
+      const messages = document.getElementById('chatMessages');
+      messages.appendChild(message);
+      messages.scrollTop = messages.scrollHeight;
+      return message;
+    }
+
+    function getChatContext() {
+      return {
+        city: airQualityLocation || '',
+        airQuality: airQualityData,
+        commute: document.getElementById('commuteMode').value,
+        budget: document.getElementById('budgetLevel').value,
+        needs: Array.from(document.querySelectorAll('.profileNeed:checked')).map((item) => item.value),
+      };
+    }
+
+    async function sendChat() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const sendButton = document.getElementById('sendChatButton');
+      if (sendButton.disabled) return;
+      playClickSound();
+
+      appendChatMessage(text, 'user');
+      input.value = '';
+      const priorHistory = chatHistory.slice(-8);
+      const pending = appendChatMessage('Thinking…', 'assistant');
+      sendButton.disabled = true;
+      sendButton.textContent = '…';
+      document.getElementById('aiConnectionStatus').textContent = 'Connecting…';
+      try {
+        if (window.location.protocol === 'file:') {
+          throw new Error('The AI server cannot run by opening index.html directly. Use the Netlify site, or start Netlify Dev using the README steps.');
+        }
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, history: priorHistory, context: getChatContext() }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'The AI service could not answer. Please try again.');
+        const answer = typeof result.answer === 'string' ? result.answer.trim() : '';
+        if (!answer) throw new Error('The AI service returned an empty answer. Please rephrase your question.');
+        pending.remove();
+        appendChatMessage(answer, 'assistant');
+        chatHistory.push({ role: 'user', text }, { role: 'assistant', text: answer });
+        if (chatHistory.length > 12) chatHistory.splice(0, chatHistory.length - 12);
+        playSuccessChime();
+        document.getElementById('aiConnectionStatus').textContent = 'AI connected';
+      } catch (error) {
+        pending.remove();
+        appendChatMessage(error.message || 'Could not connect. Check the hosting setup and try again.', 'assistant');
+        document.getElementById('aiConnectionStatus').textContent = 'Connection needed';
+      } finally {
+        sendButton.disabled = false;
+        sendButton.textContent = 'Send';
+      }
+    }
+
+    // --- 11. Seed Demo Trigger ---
+    function triggerSeedDemo() {
+      playSuccessChime();
+      confetti({ particleCount: 90, spread: 90, origin: { y: 0.6 }, colors: ['#FF2A6D', '#00F59B', '#00E5FF', '#FFB703'] });
+      setMode('severe_smog');
+      alert("Loaded the sample Delhi severe-smog scenario. Its preset readings are illustrative demo data, not live measurements.");
+    }
+
+    // --- 12. Bilingual Toggle ---
+    let currentLang = 'en';
+    function toggleLanguage() {
+      playClickSound();
+      currentLang = currentLang === 'en' ? 'hi' : 'en';
+      document.getElementById('langBtnText').innerText = currentLang === 'en' ? 'हिंदी' : 'ENG';
+      if (currentLang === 'hi') {
+        document.getElementById('heroHeading').innerText = 'गंभीर सर्दियों के स्मॉग में अपने परिवार की सुरक्षा करें';
+        document.getElementById('heroSub').innerText = 'अपने शहर के मॉडल-आधारित वायु-गुणवत्ता अनुमान देखें और परिवार के लिए रोज़मर्रा के सुझाव पूछें।';
+      } else {
+        document.getElementById('heroHeading').innerText = "Navigate Severe Winter Smog with Your Family's Clean-Air Copilot";
+        document.getElementById('heroSub').innerText = "Load air-quality estimates for your city and ask the Family Clean-Air Copilot for practical routines, indoor-air ideas, sustainable swaps, and the impact of each choice.";
+      }
+    }
+
+    // --- Light / Dark Theme Toggle ---
+    function syncThemeIcon() {
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
+      document.getElementById('themeToggleBtn').setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      try { localStorage.setItem('saanssaathi-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); } catch (error) {}
+      syncThemeIcon();
+    }
+    try {
+      const savedTheme = localStorage.getItem('saanssaathi-theme');
+      if (savedTheme === 'light') document.documentElement.classList.remove('dark');
+      if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+    } catch (error) {}
+    // Initialization
+    window.onload = function() {
+      syncThemeIcon();
+      renderModes();
+      renderPollutants();
+      updateAirQualityDashboard();
+      document.getElementById('commuteMode').addEventListener('change', syncHouseholdSummary);
+      document.getElementById('budgetLevel').addEventListener('change', syncHouseholdSummary);
+      document.querySelectorAll('.profileNeed').forEach((item) => item.addEventListener('change', syncHouseholdSummary));
+      selectHotspot('shroud');
+      renderPlan();
+      runSimulation();
+    };
+  </script>
+</body>
+</html>
+
+
+
+
